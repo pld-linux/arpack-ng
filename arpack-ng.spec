@@ -14,13 +14,11 @@ Group:		Libraries
 Source0:	https://github.com/opencollab/arpack-ng/archive/%{version}/%{name}-%{version}.tar.gz
 # Source0-md5:	e28fdbe33ee44a16e2733c180ec2a2bd
 URL:		https://github.com/opencollab/arpack-ng
-BuildRequires:	autoconf >= 2.67
-BuildRequires:	automake
 BuildRequires:	blas-devel
+BuildRequires:	cmake >= 3.0
 BuildRequires:	gcc-g77
 BuildRequires:	lapack-devel
 BuildRequires:	libstdc++-devel
-BuildRequires:	libtool	>= 2:2.4.2
 BuildRequires:	pkgconfig
 Provides:	arpack = %{version}-%{release}
 Obsoletes:	arpack < 3
@@ -53,6 +51,7 @@ Summary(pl.UTF-8):	Pliki programistyczne ARPACK
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	blas-devel
+Requires:	lapack-devel
 Provides:	arpack-devel = %{version}-%{release}
 Obsoletes:	arpack-devel < 3
 
@@ -80,24 +79,36 @@ Statyczna biblioteka ARPACK.
 %setup -q
 
 %build
-%{__libtoolize}
-%{__aclocal} -I m4
-%{__autoconf}
-%{__automake}
-%configure \
-	--enable-icb \
-	%{?with_static_libs:--enable-static}
-
+%if %{with static_libs}
+install -d build-static
+cd build-static
+%cmake .. \
+	-DBUILD_SHARED_LIBS=OFF \
+	-DCMAKE_INSTALL_INCLUDEDIR=include \
+	-DICB=ON
 %{__make}
+cd ..
+%endif
+install -d build
+cd build
+%cmake .. \
+	-DICB=ON
+%{__make}
+cd ..
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} install \
+%if %{with static_libs}
+%{__make} -C build-static install \
+	DESTDIR=$RPM_BUILD_ROOT
+%endif
+
+%{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-# obsoleted by pkg-config
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/libarpack.la
+# not installed by cmake
+cp -p build/{arpackSolver,parpack}.pc $RPM_BUILD_ROOT%{_pkgconfigdir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -119,7 +130,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_pkgconfigdir}/arpack.pc
 %{_pkgconfigdir}/arpackSolver.pc
 %{_pkgconfigdir}/parpack.pc
-#%{_libdir}/cmake/arpack-ng
+%{_libdir}/cmake/arpackng
 
 %if %{with static_libs}
 %files static
