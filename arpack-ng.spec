@@ -6,13 +6,13 @@
 Summary:	Subroutines for solving large scale eigenvalue problems
 Summary(pl.UTF-8):	Rozwiązywanie zagadnienia własnego dla dużych macierzy
 Name:		arpack-ng
-Version:	3.8.0
+Version:	3.9.0
 Release:	1
 License:	BSD
 Group:		Libraries
 #Source0Download: https://github.com/opencollab/arpack-ng/tags
 Source0:	https://github.com/opencollab/arpack-ng/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	bb4cf448f2480a0ffe5517d579f980c3
+# Source0-md5:	e28fdbe33ee44a16e2733c180ec2a2bd
 URL:		https://github.com/opencollab/arpack-ng
 BuildRequires:	autoconf >= 2.67
 BuildRequires:	automake
@@ -115,9 +115,11 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc DOCUMENTS/*.doc
 %attr(755,root,root) %{_libdir}/libarpack.so
-%{_includedir}/arpack
+%{_includedir}/arpack-ng
 %{_pkgconfigdir}/arpack.pc
-%{_libdir}/cmake/arpack-ng
+%{_pkgconfigdir}/arpackSolver.pc
+%{_pkgconfigdir}/parpack.pc
+#%{_libdir}/cmake/arpack-ng
 
 %if %{with static_libs}
 %files static
